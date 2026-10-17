@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+          - runner: ubuntu-latest
+          - runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Test
+        env:
+          CGO_ENABLED: '1'
+        run: go test ./...
+      - name: Vet
+        env:
+          CGO_ENABLED: '1'
+        run: go vet ./...

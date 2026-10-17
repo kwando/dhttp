@@ -35,7 +35,14 @@ type statement struct {
 
 var identifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z_0-9]*$`)
 
+// Overridden by the release workflow's -ldflags; local builds report dev.
+var version = "dev"
+
 func main() {
+	if len(os.Args) == 2 && (os.Args[1] == "--version" || os.Args[1] == "-version") {
+		fmt.Println("duckdb-http " + version)
+		return
+	}
 	if len(os.Args) > 1 && os.Args[1] == "backup" {
 		if err := backupCommand(os.Args[2:]); err != nil {
 			log.Fatal(err)

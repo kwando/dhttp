@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            os: darwin
+            arch: arm64
+          - runner: ubuntu-latest
+            os: linux
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            os: linux
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Test and vet
+        env:
+          CGO_ENABLED: '1'
+        run: |
+          go test -count=1 ./...
+          go vet ./...
+      - name: Build archive
+        shell: bash
+        env:
+          CGO_ENABLED: '1'
+          RELEASE_TAG: ${{ github.ref_name }}
+          TARGET_OS: ${{ matrix.os }}
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          test "$(go env GOOS)" = "$TARGET_OS"
+          test "$(go env GOARCH)" = "$TARGET_ARCH"
+          mkdir -p dist "$RUNNER_TEMP/release"
+          go build -trimpath -ldflags="-s -w -X main.version=$RELEASE_TAG" -o "$RUNNER_TEMP/release/duckdb-http" .
+          test "$("$RUNNER_TEMP/release/duckdb-http" --version)" = "duckdb-http $RELEASE_TAG"
+          tar -czf "dist/duckdb-http_${RELEASE_TAG}_${TARGET_OS}_${TARGET_ARCH}.tar.gz" -C "$RUNNER_TEMP/release" duckdb-http
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum ./*.tar.gz > SHA256SUMS
+          sha256sum -c SHA256SUMS
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --generate-notes --title "$RELEASE_TAG"
