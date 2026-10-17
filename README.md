@@ -1,13 +1,13 @@
-# duckdb-http
+# dhttp
 
-A single-node DuckDB server with the core rqlite-style SQL-over-HTTP endpoints and an additional file-import API. It is **not** a replicated database and does not provide SQLite SQL compatibility.
+An independent single-node HTTP API for DuckDB with the core rqlite-style SQL endpoints and an additional file-import API. It is not affiliated with or endorsed by the DuckDB Foundation. It is **not** a replicated database and does not provide SQLite SQL compatibility.
 
 ## Run
 
 Requires Go 1.25 or newer and a C compiler (DuckDB's Go driver uses CGO).
 
 ```sh
-cd duckdb-http
+cd dhttp
 go run . -db ./data.duckdb -listen 127.0.0.1:4001
 ```
 
@@ -86,6 +86,6 @@ Run tests with `go test ./...`.
 
 ## CI and releases
 
-When `duckdb-http/` is published as a **repository root**, `.github/workflows/test.yml` runs tests and vet on macOS arm64, Linux amd64, and Linux arm64. Pushing a `v*` tag runs those checks again, builds a native CGO-enabled binary on each platform, and publishes three archives plus `SHA256SUMS` in a GitHub release. This directory is currently a sibling of the separate `migration-tool` Git repository, so workflows here are not active until `duckdb-http/` is placed at the root of its own GitHub repository (or the workflow paths are adjusted for another repository layout).
+The `.github/workflows/test.yml` workflow runs tests and vet on macOS arm64, Linux amd64, and Linux arm64. Pushing a `v*` tag runs those checks again, builds a native CGO-enabled binary on each platform, and publishes three archives plus `SHA256SUMS` in a GitHub release.
 
-Locally, `go run . --version` prints `duckdb-http dev`; tagged release binaries print their embedded tag. The release process needs hosted `macos-15` (arm64) and `ubuntu-24.04-arm` runners and `contents: write` access for its publish job.
+Locally, `go run . --version` prints `dhttp dev`; tagged release binaries print their embedded tag. The release process needs hosted `macos-15` (arm64) and `ubuntu-24.04-arm` runners and `contents: write` access for its publish job.

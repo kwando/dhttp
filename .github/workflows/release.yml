@@ -48,9 +48,9 @@ jobs:
           test "$(go env GOOS)" = "$TARGET_OS"
           test "$(go env GOARCH)" = "$TARGET_ARCH"
           mkdir -p dist "$RUNNER_TEMP/release"
-          go build -trimpath -ldflags="-s -w -X main.version=$RELEASE_TAG" -o "$RUNNER_TEMP/release/duckdb-http" .
-          test "$("$RUNNER_TEMP/release/duckdb-http" --version)" = "duckdb-http $RELEASE_TAG"
-          tar -czf "dist/duckdb-http_${RELEASE_TAG}_${TARGET_OS}_${TARGET_ARCH}.tar.gz" -C "$RUNNER_TEMP/release" duckdb-http
+          go build -trimpath -ldflags="-s -w -X main.version=$RELEASE_TAG" -o "$RUNNER_TEMP/release/dhttp" .
+          test "$("$RUNNER_TEMP/release/dhttp" --version)" = "dhttp $RELEASE_TAG"
+          tar -czf "dist/dhttp_${RELEASE_TAG}_${TARGET_OS}_${TARGET_ARCH}.tar.gz" -C "$RUNNER_TEMP/release" dhttp
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ matrix.os }}-${{ matrix.arch }}

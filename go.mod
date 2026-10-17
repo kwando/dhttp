@@ -1,4 +1,4 @@
-module example.com/duckdb-http
+module github.com/kwando/dhttp
 
 go 1.25.0
 

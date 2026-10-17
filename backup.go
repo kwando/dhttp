@@ -16,7 +16,7 @@ import (
 // performs the copy while it owns the live database; copying the live file
 // directly could omit uncheckpointed WAL data or race with a write.
 func (s *server) backupSnapshot(ctx context.Context) (string, func(), error) {
-	dir, err := os.MkdirTemp("", "duckdb-http-backup-*")
+	dir, err := os.MkdirTemp("", "dhttp-backup-*")
 	if err != nil {
 		return "", nil, err
 	}
@@ -34,7 +34,7 @@ func (s *server) backupSnapshot(ctx context.Context) (string, func(), error) {
 		return "", nil, err
 	}
 	// The alias is derived from an OS-generated temporary directory name.
-	alias := "snapshot_" + strings.ReplaceAll(strings.TrimPrefix(filepath.Base(dir), "duckdb-http-backup-"), "-", "_")
+	alias := "snapshot_" + strings.ReplaceAll(strings.TrimPrefix(filepath.Base(dir), "dhttp-backup-"), "-", "_")
 	if _, err := conn.ExecContext(ctx, `ATTACH '`+strings.ReplaceAll(path, `'`, `''`)+`' AS "`+alias+`"`); err != nil {
 		cleanup()
 		return "", nil, err
@@ -91,7 +91,7 @@ func backupCommand(args []string) error {
 		return err
 	}
 	if *out == "" || flags.NArg() != 0 {
-		return errors.New("usage: duckdb-http backup -out FILE [-url http://127.0.0.1:4001]")
+		return errors.New("usage: dhttp backup -out FILE [-url http://127.0.0.1:4001]")
 	}
 	url := strings.TrimRight(*serverURL, "/") + "/db/backup"
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
@@ -120,7 +120,7 @@ func backupCommand(args []string) error {
 	if resp.Header.Get("Content-Type") != "application/octet-stream" {
 		return fmt.Errorf("unexpected backup content type: %q", resp.Header.Get("Content-Type"))
 	}
-	file, err := os.CreateTemp(filepath.Dir(*out), ".duckdb-http-backup-*")
+	file, err := os.CreateTemp(filepath.Dir(*out), ".dhttp-backup-*")
 	if err != nil {
 		return err
 	}

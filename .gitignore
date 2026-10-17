@@ -1,4 +1,4 @@
-/duckdb-http
+/dhttp
 /dist/
 *.duckdb
 *.duckdb.wal

@@ -40,7 +40,7 @@ var version = "dev"
 
 func main() {
 	if len(os.Args) == 2 && (os.Args[1] == "--version" || os.Args[1] == "-version") {
-		fmt.Println("duckdb-http " + version)
+		fmt.Println("dhttp " + version)
 		return
 	}
 	if len(os.Args) > 1 && os.Args[1] == "backup" {
@@ -98,7 +98,7 @@ func (s *server) routes() http.Handler {
 		if s.user != "" {
 			user, pass, ok := r.BasicAuth()
 			if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(s.user)) != 1 || subtle.ConstantTimeCompare([]byte(pass), []byte(s.password)) != 1 {
-				w.Header().Set("WWW-Authenticate", `Basic realm="duckdb-http"`)
+				w.Header().Set("WWW-Authenticate", `Basic realm="dhttp"`)
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -521,7 +521,7 @@ func (s *server) importHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, s.maxUpload)
-	f, err := os.CreateTemp("", "duckdb-http-import-*")
+	f, err := os.CreateTemp("", "dhttp-import-*")
 	if err != nil {
 		http.Error(w, "cannot create upload file", http.StatusInternalServerError)
 		return

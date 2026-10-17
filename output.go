@@ -23,7 +23,7 @@ func (s *server) formattedQuery(w http.ResponseWriter, r *http.Request, st state
 		"ndjson":  "application/x-ndjson",
 		"parquet": "application/vnd.apache.parquet",
 	}
-	dir, err := os.MkdirTemp("", "duckdb-http-query-*")
+	dir, err := os.MkdirTemp("", "dhttp-query-*")
 	if err != nil {
 		http.Error(w, "cannot create export file", http.StatusInternalServerError)
 		return
